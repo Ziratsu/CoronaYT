@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corona Graph</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="graphique">
+        <h1>Coronavirus en France</h1>
+    </div>
+
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+
+    <script>
+
+        let margin = { top: 20, right: 20, bottom: 100, left: 50 },
+            width  = 1000 - margin.left - margin.right,
+            height = 600 - margin.top - margin.bottom;
+
+    
+        let svg = d3.select('#graphique')
+                    .append('svg')
+                    .attr('viewBox', `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+                    .append('g')
+                    .attr('transform', `translate(${margin.left}, ${margin.top})`)
+
+
+
+
+d3.csv('data.csv').then(function(data){
+
+        let parseTime = d3.timeParse('%Y-%m-%d');
+
+        data.forEach(function(d){
+            d.date = parseTime(d.date);
+            d.value;
+        })
+
+let x = d3.scaleTime()
+            .domain(d3.extent(data, function(d){ return d.date }))
+            .range([0, width]);
+
+
+
+let axeX = d3.axisBottom(x)
+             .ticks(30)
+             .tickFormat(function(d,i){return tickLabels[i]})
+
+svg.append('g')
+   .attr('transform', `translate(0, ${height})`)
+   .attr('class', 'axeBlanc')
+   .call(axeX)
+   .selectAll('text')
+   .style('font-size', '14px')
+   .attr('transform', 'rotate(-30) translate(0,10)')
+   .attr('fill', 'white')
+   .attr('text-anchor', 'end')
+
+
+   // Y
+
+   let y = d3.scaleLinear()
+          .domain([0, 7000])
+          .range([height, 0])
+
+   let axeY = d3.axisLeft(y)
+                .ticks(5);
+
+  svg.append('g')
+     .attr('class', 'axeBlanc')
+     .call(axeY)
+     .style('font-size', '14px')
+     .selectAll('text')
+     .attr('fill', 'white');
+
+
+
+// Ajout de la ligne
+
+svg.append('path')
+   .datum(data)
+   .attr('fill', 'none')
+   .attr('stroke', 'crimson')
+   .attr('cursor', 'pointer')
+   .attr('stroke-width', 1.5)
+   .attr('d', d3.line()
+                .x(function(d){return x(d.date)})
+                .y(function(d){return y(d.value)})
+   )
+
+// Ajout des points
+
+svg.selectAll('circle')
+   .data(data)
+   .enter()
+   .append('circle')
+   .attr('r', 5)
+   .attr('cx', function(d){return x(d.date)})
+   .attr('cy', function(d){return y(d.value)})
+   .attr('cursor', 'pointer')
+   .attr('fill', 'crimson')
+   .on('mouseover', function(d,i){
+        div.transition()
+           .duration(200)
+           .style('opacity', 0.9)
+        div.html('Cas : ' + d.value + '<br/>' + "Date : " + tickLabels[i])
+           .style('left', (d3.event.pageX) + "px")
+           .style('top', (d3.event.pageY - 28) + "px")
+   })
+   .on('mouseout', function(d){
+       div.transition()
+          .duration(500)
+          .style('opacity', 0)
+   })
+   
+let div = d3.select('body').append('div')
+            .attr('class', 'tooltip')
+            .style('opacity', 0);
+
+
+    })
+
+
+    
+let tickLabels = [
+               '16 / 02',
+               '17 / 02',
+               '18 / 02',
+               '19 / 02',
+               '20 / 02',
+               '21 / 02',
+               '22 / 02',
+               '23 / 02',
+               '24 / 02',
+               '25 / 02',
+               '26 / 02',
+               '27 / 02',
+               '28 / 02',
+               '29 / 02',
+               '01 / 03',
+               '02 / 03',
+               '03 / 03',
+               '04 / 03',
+               '05 / 03',
+               '06 / 03',
+               '07 / 03',
+               '08 / 03',
+               '09 / 03',
+               '10 / 03',
+               '11 / 03',
+               '12 / 03',
+               '13 / 03',
+               '14 / 03',
+               '15 / 03',
+               '16 / 03',
+              ]
+    
+    </script>
+</body>
+</html>
